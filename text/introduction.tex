@@ -1,0 +1,92 @@
+\chapter{Introdução}
+\label{chp:introducao}
+
+\section{Contextualização}
+
+A crescente demanda por processamento e análise de grandes volumes de dados
+impulsionou a adoção de arquiteturas de \textit{Data Lake}, que permitem o
+armazenamento centralizado de dados brutos em diferentes formatos:
+estruturados, semiestruturados e não estruturados, sem necessidade de
+transformação prévia \citep{tast2026comparative}. Nesse sentido, o armazenamento é
+desacoplado do processamento, favorecendo flexibilidade e escalabilidade. Sendo
+amplamente utilizado em pipelines de aprendizado de máquina e análise de dados
+em larga escala, o \textit{Data Lake} atua como repositório central para dados de
+diferentes fontes, como vídeos, imagens e documentos.
+
+Em cenários de nuvem híbrida, organizações que buscam mitigar riscos de soberania
+de dados e de dependência de fornecedor (\textit{vendor lock-in}) optam por manter
+parte da infraestrutura de armazenamento \textit{on-premises}, replicando
+funcionalidades oferecidas por provedores como Amazon Web Services (AWS), Microsoft
+Azure e Google Cloud Platform (GCP). A camada de armazenamento de objetos é
+componente central nessas arquiteturas, e o protocolo S3 da AWS consolidou-se como
+padrão de fato para interoperabilidade entre sistemas \citep{tast2026comparative}.
+
+Nesse contexto, o MinIO tornou-se uma solução amplamente utilizada para
+armazenamento de objetos compatível com a API S3 em arquiteturas de \textit{Data Lake}
+híbridas \citep{abdel2026pipeline}. Ao longo dos anos, a empresa responsável pelo
+projeto promoveu mudanças progressivas em seu modelo de distribuição e licenciamento:
+em 2021, a licença foi alterada de Apache 2.0 para GNU AGPLv3; em maio de 2025, a
+interface de administração web foi removida da edição comunitária; em outubro de
+2025, as distribuições binárias pré-compiladas foram descontinuadas, passando a
+edição comunitária a ser distribuída apenas como código-fonte; e em fevereiro de
+2026, o repositório público foi oficialmente marcado como não mantido
+(\textit{THIS REPOSITORY IS NO LONGER MAINTAINED}), com correções de segurança
+passando a ser avaliadas caso a caso, sem garantias \citep{minio2026repo,devpro2025,faun2026}.
+O suporte ativo, os binários e as funcionalidades completas de administração foram
+concentrados no produto comercial MinIO AIStor, disponível por assinatura.
+
+Esse cenário expõe organizações que basearam sua camada de armazenamento de objetos
+no MinIO a riscos concretos de segurança, de conformidade e de sustentabilidade
+tecnológica, tornando relevante a avaliação de alternativas viáveis com
+licenciamento aberto e compatibilidade com a API S3, além da governança de dados,
+para mitigar riscos de dependência tecnológica e de \textit{vendor lock-in}.
+
+\section{Proposta}
+
+Este trabalho propõe um estudo experimental para avaliar comparativamente ao menos
+três soluções de armazenamento de objetos compatíveis com a API S3, utilizando o
+MinIO como \textit{baseline} de referência, sendo o RustFS uma das alternativas
+obrigatoriamente incluídas. As demais soluções serão selecionadas durante o
+levantamento bibliográfico, priorizando projetos com licenciamento aberto e adoção
+ativa pela comunidade.
+
+O objetivo geral é avaliar comparativamente alternativas ao MinIO para armazenamento
+de objetos em arquiteturas de \textit{Data Lake} híbridas, considerando aspectos de
+desempenho, compatibilidade com a API S3, interoperabilidade com provedores de
+nuvem, custos, licenciamento, sustentabilidade e riscos tecnológicos.
+
+São objetivos específicos deste trabalho:
+
+\begin{itemize}
+    \item Identificar soluções de armazenamento de objetos compatíveis com a API S3
+          que possam constituir alternativas ao MinIO em arquiteturas híbridas;
+    \item Caracterizar os requisitos técnicos relevantes para armazenamento de
+          objetos em arquiteturas de \textit{Data Lake} híbridas;
+    \item Implementar um ambiente experimental padronizado para implantação e
+          avaliação das soluções selecionadas;
+    \item Investigar a compatibilidade das soluções com a API S3 e sua
+          interoperabilidade com serviços de nuvem (AWS, Azure e GCP);
+    \item Avaliar o desempenho e o consumo de recursos das soluções em cenários
+          controlados com conjuntos de dados de diferentes características;
+    \item Analisar comparativamente as soluções segundo custos, modelo de
+          licenciamento, maturidade do projeto e riscos tecnológicos.
+\end{itemize}
+
+\section{Justificativa}
+
+As mudanças progressivas no modelo de distribuição e licenciamento do MinIO
+representam um risco concreto para organizações públicas e privadas que adotaram
+a solução como componente central de sua infraestrutura de dados. A descontinuação
+das distribuições binárias e o congelamento do desenvolvimento comunitário em 2025,
+seguidos pelo arquivamento do repositório público em fevereiro de 2026
+\citep{faun2026,minio2026repo}, comprometem a previsibilidade operacional de
+ambientes que dependem da solução, especialmente em contextos de nuvem híbrida onde
+soberania de dados e controle sobre a infraestrutura são requisitos críticos.
+
+A ausência de estudos comparativos publicados que avaliem alternativas ao MinIO
+nesse cenário específico --- considerando soluções emergentes como o RustFS e
+aspectos como compatibilidade com provedores de nuvem, sustentabilidade do
+licenciamento e riscos de dependência tecnológica --- justifica a relevância
+acadêmica desta pesquisa \citep{tast2026comparative}. Os resultados poderão
+orientar equipes de engenharia de dados na seleção de tecnologias mais sustentáveis,
+contribuindo para a redução de riscos de segurança e de \textit{vendor lock-in}.
