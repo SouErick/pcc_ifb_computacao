@@ -104,9 +104,10 @@ aberto \citep{tast2026comparative}. Contudo, até o momento não foram identific
 estudos que avaliem alternativas ao MinIO considerando, de forma conjunta, o
 contexto de arquiteturas de \textit{Data Lake} híbridas, a compatibilidade com
 provedores de nuvem, a sustentabilidade do licenciamento e os riscos de dependência
-tecnológica, incluindo soluções emergentes como o RustFS. A confirmação dessa
-lacuna é um dos resultados esperados do mapeamento sistemático
-(Capítulo~\ref{chp:mapeamento}). Os resultados poderão orientar equipes de
+tecnológica, incluindo soluções emergentes como o RustFS. Essa lacuna foi
+confirmada pelo mapeamento sistemático descrito no
+Capítulo~\ref{chp:mapeamento}, que não identificou nenhum estudo revisado por
+pares avaliando o RustFS. Os resultados poderão orientar equipes de
 engenharia de dados na seleção de tecnologias mais sustentáveis, contribuindo para
 a redução de riscos de segurança e de \textit{vendor lock-in}, assim como para o
 fortalecimento do domínio na área de governança de dados.
@@ -116,9 +117,22 @@ fortalecimento do domínio na área de governança de dados.
 Este trabalho propõe um estudo experimental para avaliar comparativamente ao menos
 três soluções de armazenamento de objetos compatíveis com a API S3, além do MinIO
 como \textit{baseline} de referência, sendo o RustFS uma das alternativas
-obrigatoriamente incluídas. As demais soluções serão selecionadas durante o
-levantamento bibliográfico, priorizando projetos com licenciamento aberto e adoção
-ativa pela comunidade.
+obrigatoriamente incluídas. As demais soluções foram selecionadas a partir dos
+resultados do mapeamento sistemático, priorizando projetos com licenciamento aberto
+e adoção ativa pela comunidade.
+
+A avaliação é conduzida por meio de um cenário de migração. Em vez de comparar as
+soluções isoladamente, o laboratório reproduz a situação concreta enfrentada pelas
+organizações afetadas: a transferência de um acervo de objetos do MinIO para uma
+solução alternativa, seguida da verificação de que o acervo permaneceu íntegro e de
+que as operações que dependiam dele continuam funcionando. Essa escolha mantém o
+experimento ancorado no problema descrito na Seção~\ref{sec:analise-problema}, cuja
+terceira saída é justamente a substituição da camada de armazenamento.
+
+Cabe esclarecer que o cenário de migração é o instrumento da comparação, e não uma
+demonstração de viabilidade. A pergunta que o laboratório responde é se cada
+alternativa sustenta uma migração adequada, e a que custo, admitindo-se que a
+resposta possa ser negativa para parte das soluções avaliadas.
 
 \noindent
 A pesquisa adota como princípio metodológico a rastreabilidade entre levantamento
@@ -127,21 +141,21 @@ coletada e cada cenário executado deve remeter a um achado documentado do
 mapeamento sistemático. Nenhum item do desenho experimental será introduzido sem
 referência ao estudo que o fundamenta ou, na ausência de precedente na literatura,
 sem justificativa explícita de que constitui contribuição original do trabalho.
-Essa cadeia de derivação será documentada no Capítulo~\ref{chp:mapeamento} e
+Essa cadeia de derivação está documentada na Seção~\ref{sec:derivacao} e é
 instanciada no Capítulo~\ref{chp:metodologia}.
 
-\section[Objetivos]{Objetivos}
+\section{Objetivos}
 
-\subsection[Objetivo Geral]{Objetivo Geral}
+\subsection{Objetivo Geral}
 \label{sec:objetivo-geral}
 
 O objetivo geral é avaliar comparativamente alternativas ao MinIO para armazenamento
-de objetos em arquiteturas de \textit{Data Lake} híbridas, considerando as dimensões
-de comparação identificadas no mapeamento sistemático da literatura, em especial
-desempenho, compatibilidade com a API S3, interoperabilidade com provedores de
-nuvem e riscos tecnológicos.
+de objetos em arquiteturas de \textit{Data Lake} híbridas, por meio de um cenário
+de migração, considerando as dimensões de comparação identificadas no mapeamento
+sistemático da literatura, em especial desempenho, compatibilidade com a API S3,
+integridade dos dados transferidos e riscos tecnológicos.
 
-\subsection[Objetivos Específicos]{Objetivos Específicos}
+\subsection{Objetivos Específicos}
 \label{sec:objetivos-especificos}
 
 São objetivos específicos deste trabalho:
@@ -151,14 +165,15 @@ São objetivos específicos deste trabalho:
           que possam constituir alternativas ao MinIO em arquiteturas híbridas;
     \item Caracterizar os requisitos técnicos relevantes para armazenamento de
           objetos em arquiteturas de \textit{Data Lake} híbridas;
-    \item Implementar um ambiente experimental padronizado para implantação e
-          avaliação das soluções selecionadas;
-    \item Investigar a compatibilidade das soluções com a API S3 e sua
-          interoperabilidade com serviços de nuvem (AWS, Azure e GCP);
-    \item Avaliar o desempenho e o consumo de recursos das soluções em cenários
-          controlados com conjuntos de dados de diferentes características;
-    \item Analisar comparativamente as soluções segundo custos, modelo de
-          licenciamento, maturidade do projeto e riscos tecnológicos.
+    \item Levantar, a partir da literatura, as dimensões, métricas e procedimentos
+          experimentais empregados na avaliação desse tipo de solução;
+    \item Especificar um ambiente experimental padronizado para implantação das
+          soluções selecionadas e execução do cenário de migração;
+    \item Definir os indicadores que caracterizam uma migração bem-sucedida,
+          abrangendo integridade dos objetos, cobertura das operações da API S3 e
+          custo da transferência;
+    \item Analisar comparativamente as soluções segundo modelo de licenciamento,
+          maturidade do projeto e riscos tecnológicos.
 \end{itemize}
 
 \section{Escopo}
@@ -168,14 +183,16 @@ Este trabalho delimita-se à avaliação comparativa experimental de soluções 
 armazenamento de objetos compatíveis com a \textit{API} S3, implantadas
 \textit{on-premises} no contexto de arquiteturas de \textit{Data Lake} híbridas.
 A delimitação opera em dois níveis distintos: um conjunto de restrições fixadas
-\textit{a priori}, que decorrem diretamente da formulação do problema, e um
-conjunto de parâmetros deliberadamente mantidos em aberto, cuja definição é
-produto do mapeamento sistemático da literatura descrito no Capítulo~\ref{chp:mapeamento}.
+\textit{a priori}, descritas na próxima seção, que decorrem diretamente da
+formulação do problema; e um conjunto de parâmetros deliberadamente mantidos em
+aberto, cuja definição é produto do mapeamento sistemático da literatura descrito
+no Capítulo~\ref{chp:mapeamento}.
 
 \subsection{Delimitações fixadas a priori}
 
 São fixadas previamente apenas as restrições que decorrem da natureza do problema
-investigado ou de decisões de viabilidade:
+investigado ou de decisões de viabilidade, as quais não dependem de achados do
+mapeamento sistemático. São elas:
 
 \begin{itemize}
     \item \textbf{Objeto de estudo.} Soluções de armazenamento de objetos que
@@ -185,6 +202,9 @@ investigado ou de decisões de viabilidade:
           com S3 não integram o estudo.
     \item \textbf{\textit{Baseline} de referência.} O MinIO, por ser a solução
           cuja descontinuidade origina o problema.
+    \item \textbf{Cenário experimental.} A comparação é conduzida por meio da
+          migração de um acervo de objetos a partir do MinIO, por corresponder à
+          decisão concreta enfrentada pelas organizações afetadas.
     \item \textbf{Licenciamento aberto.} Apenas soluções sob licença de código
           aberto são consideradas.
     \item \textbf{Alternativa obrigatória.} O RustFS integra o conjunto avaliado
@@ -203,67 +223,73 @@ investigado ou de decisões de viabilidade:
 \subsection{Parâmetros derivados do mapeamento sistemático}
 
 Os elementos a seguir \textbf{não} são fixados neste capítulo, por constituírem
-resultado do levantamento e não premissa dele:
+resultado do mapeamento sistemático e não premissa dele. Eles são o elo entre o
+levantamento e a experimentação:
 
 \begin{itemize}
-    \item a identificação das demais soluções que comporão o conjunto avaliado;
-    \item as dimensões de comparação pertinentes à avaliação em contexto híbrido;
-    \item as métricas, os procedimentos de medição e os critérios de validade;
+    \item a identificação das demais soluções que comporão o conjunto avaliado, ou
+          seja, quais produtos alternativos ao MinIO;
+    \item as dimensões de comparação pertinentes à avaliação em contexto híbrido,
+          ou seja, quais aspectos do armazenamento de objetos são relevantes para
+          a análise;
+    \item as métricas, os procedimentos de medição e os critérios de validade, isto
+          é, o que será usado no laboratório para avaliar cada dimensão;
     \item os cenários de carga e as características dos conjuntos de dados;
     \item os critérios de verificação da compatibilidade com a \textit{API} S3 e da
-          interoperabilidade com provedores de nuvem pública;
+          integridade dos objetos após a migração;
     \item os fatores qualitativos relevantes, como licenciamento, governança,
           maturidade e riscos tecnológicos;
     \item as lacunas de pesquisa que o desenho experimental se propõe a endereçar.
 \end{itemize}
 
-A definição desses parâmetros está sujeita a suporte na literatura e à
-exequibilidade no ambiente laboratorial. Itens fundamentados que excedam a
-capacidade disponível ou o prazo de execução serão documentados como limitações
-declaradas e indicados entre os trabalhos futuros.
+A definição desses parâmetros está sujeita ao suporte encontrado na literatura e à
+capacidade do ambiente laboratorial disponível. Elementos fundamentados que
+excedam essa capacidade são registrados como limitação declarada.
 
 \subsection{Fora do escopo}
 
-Não integram este trabalho: o desenvolvimento de novas soluções de armazenamento
-de objetos; a avaliação de soluções proprietárias ou de código fechado; a
-implementação de pipelines de dados em produção; a integração com motores de
-processamento distribuído específicos, como Apache Spark ou Apache Flink; a
-condução de experimentos em ambientes de produção de organizações reais; e a
-avaliação de custos de aquisição de infraestrutura física. Os resultados
-caracterizam o comportamento das soluções sob as condições controladas do
-ambiente experimental e não devem ser generalizados para ambientes de produção
-sem validação adicional.
+Não integram este trabalho: o desenvolvimento de novas soluções de armazenamento;
+a avaliação de ferramentas proprietárias ou de código fechado; pipelines de dados
+em produção real; a integração com motores de processamento específicos, como
+Apache Spark ou Apache Flink; experimentos conduzidos diretamente na infraestrutura
+de organizações; e os custos de aquisição de hardware físico.
+
+Por se tratar do Projeto de Conclusão de Curso, este documento apresenta o
+mapeamento sistemático concluído e a especificação do laboratório experimental. A
+execução dos experimentos e a análise de seus resultados constituem o Trabalho de
+Conclusão de Curso, etapa subsequente.
 
 \section{Organização do Trabalho}
 \label{sec:organizacao}
 
-Este trabalho está organizado em seis capítulos, encadeados de modo que cada um
-forneça os insumos do seguinte. O Capítulo~\ref{chp:introducao}, \textit{Introdução},
-apresenta o contexto da pesquisa, a análise do problema, a justificativa, a
-proposta, os objetivos, o escopo e esta seção de organização.
+Este trabalho está organizado em cinco capítulos, encadeados de modo que cada um
+forneça os insumos do seguinte.
+
+O Capítulo~\ref{chp:introducao}, \textit{Introdução}, apresenta o contexto da
+pesquisa, a análise do problema, a justificativa, a proposta, os objetivos, o
+escopo e esta seção de organização.
 
 O Capítulo~\ref{chp:fundamentacao}, \textit{Fundamentação Teórica}, estabelece o
-vocabulário conceitual necessário à leitura dos capítulos subsequentes, tratando
-de \textit{Data Lake}, \textit{Data Lakehouse}, armazenamento de objetos, protocolo
-e \textit{API} S3, computação em nuvem híbrida, soberania de dados,
-\textit{vendor lock-in}, licenciamento de software livre e armazenamento
-distribuído.
+vocabulário conceitual necessário à leitura dos capítulos subsequentes, tratando de
+\textit{Data Lake} e \textit{Data Lakehouse}, armazenamento de objetos,
+\textit{API} S3, computação em nuvem híbrida, soberania de dados, \textit{vendor
+lock-in}, licenciamento de software livre e armazenamento distribuído.
 
 O Capítulo~\ref{chp:mapeamento}, \textit{Mapeamento Sistemático da Literatura},
 documenta a execução do mapeamento conduzido segundo as diretrizes de
-\citep{petersen2015} e \citep{kitchenham2010}, abrangendo a definição das
+\citep{petersen2015} e \citep{kitchenham2010}. Abrange a definição das
 questões de pesquisa, a estratégia de busca, os critérios de inclusão e exclusão, o
 processo de seleção em três estágios, a classificação dos estudos por categorias de
 análise, a extração de dados e a síntese dos resultados. Esse capítulo fornece o
 conjunto de soluções a avaliar, as dimensões de comparação, as métricas
-correspondentes e as lacunas que o experimento endereça.
+correspondentes e as lacunas que o experimento endereça, fundamentando a escolha de
+cada métrica, cenário e solução do laboratório.
 
-O Capítulo~\ref{chp:metodologia}, \textit{Metodologia}, instancia o desenho
+O Capítulo~\ref{chp:metodologia}, \textit{Metodologia}, especifica o laboratório
 experimental a partir dos achados do capítulo anterior, detalhando o ambiente de
-testes, os conjuntos de dados, os cenários de avaliação, as métricas coletadas, o
-número de repetições e os procedimentos de análise. O
-Capítulo~\ref{chp:resultados}, \textit{Resultados e Discussão}, apresenta os dados
-obtidos e discute comparativamente o comportamento das soluções em relação ao
-\textit{baseline}. Por fim, o Capítulo~\ref{chp:conclusao}, \textit{Conclusão},
-sintetiza as contribuições do trabalho, explicita suas limitações e indica direções
-para pesquisas futuras.
+testes, os conjuntos de dados, o cenário de migração, os indicadores coletados, o
+número de repetições, os procedimentos de análise e o cronograma de execução.
+
+Por fim, o Capítulo~\ref{chp:conclusao}, \textit{Considerações Finais}, sintetiza o
+que foi estabelecido nesta etapa, explicita as limitações do trabalho e descreve o
+que será realizado no Trabalho de Conclusão de Curso.
