@@ -1,122 +1,530 @@
-\chapter{Metodologia}
-\label{chp:metodologia}
+\chapter{Mapeamento Sistemático da Literatura}
+\label{chp:mapeamento}
 
-\section{Proposta metodológica preliminar}
+Este capítulo descreve o mapeamento sistemático da literatura realizado para
+fundamentar o laboratório experimental. O mapeamento não é um fim em si mesmo:
+ele existe para responder a uma pergunta prática. Quais alternativas avaliar,
+com quais métricas e com quais ferramentas? Essas escolhas poderiam ser feitas
+por intuição, mas o resultado seria frágil. Ao derivá-las da literatura, cada
+decisão do experimento passa a ter uma origem verificável.
 
-A pesquisa será conduzida em duas grandes etapas: um mapeamento sistemático da
-literatura, que fornecerá o fundamento teórico e subsidiará a definição dos
-critérios de avaliação no laboratório prático, o qual será o objeto principal
-desta pesquisa, e um estudo experimental comparativo, com o MinIO como
-\textit{baseline} de referência. A pesquisa está estruturada em cinco fases.
+O capítulo termina na Seção~\ref{sec:derivacao}, que liga cada elemento do
+laboratório ao achado que o justifica.
 
-\subsection{Fase 1 --- Mapeamento sistemático da literatura}
+\section{Visão geral do método}
+\label{sec:visao-geral}
 
-Será realizado um mapeamento sistemático com o objetivo de identificar o que a
-literatura científica aponta como dimensões, métricas e critérios relevantes para
-avaliação de soluções de armazenamento de objetos em contextos de \textit{Data
-Lake} híbrido. O mapeamento seguirá as diretrizes de \citep{kitchenham2010}.
+Um mapeamento sistemático é uma forma estruturada de revisar a literatura. Em
+vez de reunir trabalhos por conveniência, define-se antes um protocolo: quais
+perguntas responder, onde buscar, o que incluir, o que descartar e como
+classificar o que sobrar. Só depois a busca é executada. Isso torna o processo
+auditável e permite que outra pessoa o repita.
+
+O protocolo seguiu as diretrizes de \citep{petersen2015}, específicas para
+estudos de mapeamento em engenharia de software, com apoio das recomendações de
+\citep{kitchenham2010} para revisões sistemáticas. A
+Figura~\ref{fig:mapeamento} apresenta o fluxo completo.
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=0.8\textwidth]{images/mapeamento_sistematico.png}
+    \includegraphics[width=\textwidth]{images/mapeamento_sistematico.png}
     \caption{Fluxo do mapeamento sistemático da literatura}
     \label{fig:mapeamento}
+    \caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
 \end{figure}
 
-\begin{enumerate}
-    \item \textbf{Questões de pesquisa (QPs):}
-    \begin{itemize}
-        \item QP1 --- Quais soluções de armazenamento de objetos compatíveis com
-              S3 são avaliadas na literatura em contextos de \textit{Data Lake}
-              híbrido ou \textit{on-premises}?
-        \item QP2 --- Quais dimensões e métricas são utilizadas para comparar
-              soluções de \textit{object storage} na literatura?
-        \item QP3 --- Quais fatores relacionados a licenciamento, sustentabilidade
-              e governança de dados são considerados na seleção de soluções de
-              \textit{object storage}?
-        \item QP4 --- Quais limitações ou lacunas são identificadas nos estudos
-              existentes sobre avaliação comparativa de soluções de
-              \textit{object storage}?
-    \end{itemize}
+Todas as etapas automatizáveis foram implementadas em um \textit{notebook}
+Python, aqui chamado de protocolo executável. O \textit{notebook} realiza a
+consulta às bases, a normalização e a deduplicação dos registros, a geração das
+planilhas de triagem, a consolidação das decisões e a produção das figuras e
+tabelas deste capítulo. Os números apresentados adiante são saída direta desse
+código, e não contagens feitas à mão. Reexecutar o \textit{notebook} regenera o
+conjunto de dados e, com ele, os valores reportados.
 
-    \item \textbf{String de busca:}
-    \begin{center}
-    \texttt{("object storage" OR "object store" OR "S3-compatible")}\\
-    \texttt{AND}\\
-    \texttt{("data lake" OR "hybrid cloud" OR "on-premises" OR "distributed storage")}\\
-    \texttt{AND}\\
-    \texttt{("comparison" OR "evaluation" OR "benchmark" OR "performance" OR "assessment")}
-    \end{center}
-    As buscas serão conduzidas nas bases ACM Digital Library, IEEE Xplore,
-    Scopus, Springer Link e Google Scholar, com filtro temporal de 2018 a 2026.
+Duas etapas não são automatizáveis e couberam ao autor: a leitura dos estudos e
+a decisão sobre incluí-los ou não. Um modelo de linguagem foi usado como apoio
+na pré-classificação e na leitura dirigida, conforme detalhado na
+Seção~\ref{sec:selecao}, mas nenhuma decisão de inclusão ou exclusão foi tomada
+por ele.
 
-    \item \textbf{Critérios de inclusão (CI):}
-    \begin{itemize}
-        \item CI1 --- Estuda ou avalia ao menos uma solução de armazenamento de
-              objetos compatível com S3;
-        \item CI2 --- Aborda cenários de nuvem híbrida, \textit{on-premises} ou
-              \textit{Data Lake};
-        \item CI3 --- Apresenta métricas quantitativas ou critérios qualitativos
-              de avaliação;
-        \item CI4 --- Publicado entre 2018 e 2026;
-        \item CI5 --- Disponível em texto completo.
-    \end{itemize}
+\section{Questões de pesquisa}
+\label{sec:questoes}
 
-    \item \textbf{Critérios de exclusão (CE):}
-    \begin{itemize}
-        \item CE1 --- Trata exclusivamente de armazenamento em nuvem pública
-              proprietária, sem foco em soluções de código aberto;
-        \item CE2 --- Foca em \textit{block storage} ou \textit{file storage}
-              sem comparação com \textit{object storage};
-        \item CE3 --- Não apresenta critérios de avaliação, limitando-se à
-              descrição da solução;
-        \item CE4 --- Não está escrito em inglês ou português;
-        \item CE5 --- Versão anterior de um estudo mais completo já incluído;
-        \item CE6 --- Texto completo indisponível;
-        \item CE7 --- Publicado antes de 2018.
-    \end{itemize}
+As questões abaixo orientaram a extração de dados. Elas são formuladas como
+perguntas de levantamento, e não como hipóteses. A diferença é importante:
+perguntar quais métricas a literatura usa é diferente de perguntar qual é o
+desempenho de uma solução. A primeira forma permite que o conjunto de métricas
+do experimento venha do levantamento; a segunda já suporia esse conjunto
+definido.
 
-    \item \textbf{Categorias de análise:} os estudos incluídos serão classificados
-    em até três categorias, permitindo a construção de um diagrama de Venn que
-    evidencie lacunas na literatura:
-    \begin{itemize}
-        \item C1 --- Avaliação de desempenho (\textit{throughput}, latência, IOPS,
-              consumo de recursos);
-        \item C2 --- Compatibilidade e integração (API S3, interoperabilidade com
-              AWS/Azure/GCP);
-        \item C3 --- Fatores qualitativos (licenciamento, governança,
-              sustentabilidade, \textit{vendor lock-in}).
-    \end{itemize}
-    A interseção de C1, C2 e C3 representará o escopo integral deste trabalho, e
-    sua eventual ausência na literatura reforçará a contribuição da pesquisa.
-\end{enumerate}
+\begin{description}
+    \item[QP1.] Quais sistemas de armazenamento de objetos compatíveis com a
+          \textit{API} S3 e de código aberto são reportados na literatura como
+          aplicáveis a arquiteturas de \textit{Data Lake} ou de nuvem híbrida?
 
-\subsection{Fase 2 --- Seleção e implantação}
+    \item[QP2.] Quais dimensões e métricas são empregadas para avaliar
+          comparativamente esses sistemas?
 
-Com base nos resultados do mapeamento sistemático, serão selecionadas ao menos
-três soluções de armazenamento de objetos compatíveis com a API S3, incluindo
-obrigatoriamente o RustFS. Também será construído um ambiente experimental
-padronizado para execução dos testes em condições equivalentes para todas as
-soluções, incluindo o MinIO.
+    \item[QP3.] Quais procedimentos experimentais --- cargas de trabalho,
+          conjuntos de dados, ferramentas de \textit{benchmark} e número de
+          repetições --- são adotados nessas avaliações?
 
-\subsection{Fase 3 --- Experimentação}
+    \item[QP4.] Quais fatores não funcionais --- licenciamento, governança,
+          maturidade, comunidade e risco de descontinuidade --- são considerados
+          na seleção dessas soluções?
 
-Serão executadas operações equivalentes de armazenamento e recuperação de objetos
-com conjuntos de dados de diferentes características, coletando métricas de
-desempenho, latência, \textit{throughput}, consumo de recursos e estabilidade.
-Também serão avaliadas as possibilidades de interoperabilidade com serviços AWS,
-Azure e GCP.
+    \item[QP5.] Que lacunas de pesquisa são apontadas pelos próprios autores dos
+          estudos analisados?
+\end{description}
 
-\subsection{Fase 4 --- Análise comparativa}
+Cada questão alimenta uma parte do laboratório. A QP1 define quais soluções
+avaliar; a QP2, quais dimensões comparar; a QP3, como medir; a QP4, quais
+critérios qualitativos considerar; e a QP5 situa a contribuição deste trabalho
+em relação ao que já se sabe estar faltando.
 
-Os resultados quantitativos e qualitativos serão consolidados para comparação das
-soluções em relação ao \textit{baseline} (MinIO), segundo desempenho,
-compatibilidade com S3, complexidade operacional, custos, modelo de licenciamento,
-maturidade do projeto, riscos tecnológicos e sustentabilidade da solução. Os
-critérios de comparação serão refinados a partir das dimensões levantadas no
-mapeamento sistemático.
+\section{Estratégia de busca}
+\label{sec:estrategia-busca}
 
-\subsection{Observações}
+A expressão de busca foi montada a partir de três blocos de termos, combinados
+pelo operador \texttt{AND}. Dentro de cada bloco, os sinônimos são combinados
+por \texttt{OR}:
 
-As tecnologias específicas para cada fase serão levantadas no refinamento da
-revisão da literatura.
+\begin{description}
+    \item[Bloco A --- o que é estudado.] \texttt{"object storage"},
+          \texttt{"object store"}, \texttt{"object-based storage"},
+          \texttt{"S3-compatible"}, \texttt{"S3 compatible"},
+          \texttt{"blob storage"}.
+
+    \item[Bloco B --- em que contexto ou com qual tecnologia.]
+          \texttt{"data lake"}, \texttt{"lakehouse"}, \texttt{"hybrid cloud"},
+          \texttt{"private cloud"}, \texttt{"on-premises"},
+          \texttt{"on-premise"}, \texttt{"MinIO"}, \texttt{"Ceph"},
+          \texttt{"SeaweedFS"}, \texttt{"RustFS"}, \texttt{"OpenStack Swift"},
+          \texttt{"JuiceFS"}, \texttt{"Garage S3"}, \texttt{"Zenko"}.
+
+    \item[Bloco C --- que tipo de estudo.] \texttt{evaluation},
+          \texttt{benchmark}, \texttt{benchmarking}, \texttt{comparison},
+          \texttt{comparative}, \texttt{performance}, \texttt{assessment}.
+\end{description}
+
+Na prática, a busca foi executada como dez consultas menores derivadas dessa
+mesma estrutura, e não como uma expressão única. O motivo é técnico: a interface
+de busca da base utilizada trabalha por relevância e não processa bem expressões
+booleanas longas. A união dos resultados, depois da deduplicação, equivale ao
+que uma consulta única retornaria, com a vantagem de permitir reportar o
+rendimento de cada consulta em separado.
+
+O recorte temporal vai de 2016 a 2026. O limite inferior corresponde ao período
+em que arquiteturas de \textit{Data Lake} com armazenamento de objetos
+desacoplado do processamento se consolidaram e em que o MinIO passou a ser
+adotado.
+
+\subsection{Calibração da busca}
+
+Antes da execução definitiva, verificou-se se a expressão recuperava estudos
+previamente conhecidos. O trabalho de \citep{tast2026comparative}, que
+compara sistemas de armazenamento de objetos de código aberto e é o antecedente
+mais próximo desta pesquisa, foi recuperado pela busca. Esse resultado indica
+que a expressão cobre o tema pretendido.
+
+\section{Critérios de inclusão e exclusão}
+\label{sec:criterios}
+
+Um estudo entra no corpus quando atende a todos os critérios de inclusão da
+Tabela~\ref{tab:inclusao}. Basta atender a um dos critérios de exclusão da
+Tabela~\ref{tab:exclusao} para ser descartado.
+
+\begin{table}[htb]
+\centering
+\caption{Critérios de inclusão.}
+\label{tab:inclusao}
+\begin{tabular}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Código} & \textbf{Critério} \\
+\midrule
+CI1 & Aborda sistema de armazenamento de objetos com interface compatível com S3 \\
+CI2 & Apresenta avaliação, comparação ou caracterização empírica de ao menos um sistema \\
+CI3 & Publicado entre 2016 e 2026 \\
+CI4 & Texto completo acessível \\
+CI5 & Escrito em inglês ou português \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+\begin{table}[htb]
+\centering
+\caption{Critérios de exclusão.}
+\label{tab:exclusao}
+\begin{tabular}{@{}lp{10cm}@{}}
+\toprule
+\textbf{Código} & \textbf{Critério} \\
+\midrule
+CE1 & Trata apenas de armazenamento em bloco ou de sistema de arquivos POSIX,
+      sem camada de objetos \\
+CE2 & Trata apenas de serviços proprietários de nuvem pública, sem contraparte
+      que possa ser executada pela própria organização \\
+CE3 & Não apresenta dado empírico nem critério de avaliação \\
+CE4 & Estudo secundário sem contribuição própria \\
+CE5 & Versão preliminar de trabalho publicado depois de forma mais completa \\
+CE6 & Resumo expandido, pôster ou texto com menos de quatro páginas \\
+CE7 & Texto completo indisponível após tentativa de acesso \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+Estudos descartados por CE4 não foram perdidos: suas listas de referências foram
+examinadas em busca de trabalhos ainda não recuperados pela busca automatizada,
+procedimento conhecido como \textit{snowballing} \citep{wohlin2014}.
+
+\section{Processo de seleção}
+\label{sec:selecao}
+
+A seleção ocorreu em três estágios, cada um aplicado apenas ao que foi aprovado
+no anterior. O objetivo é ler cada vez mais a respeito de cada vez menos
+trabalhos, sem precisar ler todos por inteiro.
+
+No primeiro estágio, foram lidos o título e o resumo de cada registro. No
+segundo, a introdução e a conclusão dos aprovados. No terceiro, realizou-se
+leitura dirigida das seções de metodologia e avaliação experimental, voltada
+especificamente à extração dos dados das questões QP1 a QP5. Em toda exclusão
+foi registrado o código do critério aplicado, o que permite reconstruir o
+caminho de cada decisão.
+
+Antes do primeiro estágio, um filtro automático de pertinência descartou
+registros que não mencionavam, no título ou no resumo, nenhum termo do núcleo
+conceitual da pesquisa. Esse filtro removeu 495 registros sem leitura
+individual. Uma amostra desses descartes foi revisada manualmente para
+confirmar que o filtro não eliminava trabalhos pertinentes.
+
+\subsection{Apoio de modelo de linguagem}
+\label{sec:llm}
+
+Um modelo de linguagem foi usado em duas etapas. No primeiro estágio, ele
+recebeu os critérios de inclusão e exclusão junto com o resumo de cada registro
+e produziu uma sugestão de decisão, acompanhada do critério invocado e de uma
+medida de confiança. No terceiro estágio, foi usado como apoio à leitura
+dirigida, para localizar nas seções de metodologia as informações de
+instrumentação, sistemas avaliados e cargas de trabalho.
+
+Em nenhum momento o modelo decidiu pela inclusão ou exclusão de um estudo. Todas
+as sugestões de inclusão foram revisadas pelo autor, assim como uma amostra das
+sugestões de exclusão, e a decisão final foi sempre humana. Os dados extraídos
+na leitura dirigida foram conferidos contra os textos originais.
+
+\section{Categorias de análise}
+\label{sec:categorias}
+
+Os estudos aprovados foram classificados em três categorias não exclusivas, de
+modo que um mesmo trabalho pode pertencer a mais de uma:
+
+\begin{description}
+    \item[C1 --- Avaliação de desempenho.] Reporta medidas de \textit{throughput},
+          latência, IOPS, escalabilidade ou consumo de recursos.
+    \item[C2 --- Compatibilidade e integração.] Trata da cobertura da \textit{API}
+          S3, da interoperabilidade entre sistemas ou de procedimentos de migração.
+    \item[C3 --- Fatores qualitativos.] Aborda licenciamento, governança do
+          projeto, maturidade, custo, consumo energético ou risco tecnológico.
+\end{description}
+
+A interseção das três categorias delimita o escopo central desta pesquisa. Um
+estudo que avalie ao mesmo tempo desempenho, compatibilidade e fatores
+qualitativos de soluções de armazenamento de objetos é o antecedente mais
+próximo deste trabalho, e a quantidade de estudos nessa posição indica o quanto
+o tema já foi coberto.
+
+\section{Resultados}
+\label{sec:resultados-mapeamento}
+
+A busca retornou 881 registros brutos. Após a remoção de duplicatas, restaram
+771 registros únicos, que passaram pelos três estágios de seleção. A
+Tabela~\ref{tab:funil} apresenta o funil completo.
+
+\begin{table}[htb]
+\centering
+\caption{Funil de seleção dos estudos.}
+\label{tab:funil}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Etapa} & \textbf{Registros} \\
+\midrule
+Consultas executadas                          & 10 \\
+Registros brutos recuperados                  & 881 \\
+Registros únicos após deduplicação            & 771 \\
+Aprovados no estágio 1 (título e resumo)      & 64 \\
+Aprovados no estágio 2 (introdução e conclusão) & 38 \\
+Estudos primários selecionados                & 38 \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+Sete das dez consultas atingiram o teto de cem resultados estabelecido por
+consulta. Isso significa que a coleta foi interrompida por decisão de volume, e
+não porque a base tivesse se esgotado. A Tabela~\ref{tab:exclusoes} detalha os
+motivos de exclusão no primeiro estágio.
+
+\begin{table}[htb]
+\centering
+\caption{Exclusões no primeiro estágio, por critério.}
+\label{tab:exclusoes}
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Código} & \textbf{Motivo} & \textbf{Registros} \\
+\midrule
+CE1 & Não é armazenamento de objetos                  & 551 \\
+CE3 & Sem dado empírico nem critério de avaliação     & 114 \\
+CE2 & Apenas serviço proprietário de nuvem pública    & 21 \\
+CE4 & Estudo secundário sem contribuição própria      & 16 \\
+CE5 & Versão preliminar de trabalho estendido         & 4 \\
+CE6 & Menos de quatro páginas                         & 1 \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+Dos 551 registros excluídos por CE1, 495 foram descartados pelo filtro
+automático de pertinência e 56 por avaliação individual. Já o número de
+exclusões por CE3 merece atenção: 114 trabalhos tratavam de armazenamento de
+objetos, mas não apresentavam qualquer medição ou critério de avaliação. Esse
+dado indica que boa parte da produção sobre o tema é descritiva, e não empírica.
+
+Entre os 38 estudos selecionados, 37 foram classificados em C1, 33 em C2 e 20 em
+C3. Dezoito estudos pertencem simultaneamente às três categorias. A
+Figura~\ref{fig:bolhas} mostra a distribuição por categoria e ano.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{images/figura_de_bolhas.png}
+    \caption{Distribuição dos estudos primários por categoria e ano}
+    \label{fig:bolhas}
+    \caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{figure}
+
+A figura revela dois padrões. O primeiro é a concentração recente: dos 38
+estudos, 17 são de 2026 e nenhum é anterior a 2020, apesar de a busca abranger
+desde 2016. O segundo é o surgimento tardio da categoria C3. Enquanto trabalhos
+sobre desempenho e compatibilidade existem desde 2020, os que tratam de
+licenciamento, custo e governança só aparecem a partir de 2022. A discussão
+sobre sustentabilidade de soluções de armazenamento é, portanto, recente, o que
+é coerente com o problema investigado neste trabalho: as mudanças no modelo de
+licenciamento do MinIO começaram em 2021.
+
+A relação completa dos estudos primários encontra-se no
+Apêndice~\ref{ap:mapping-study}.
+
+\section{Respostas às questões de pesquisa}
+\label{sec:sintese}
+
+\subsection{QP1 --- Soluções identificadas}
+
+A Tabela~\ref{tab:sistemas} apresenta os sistemas avaliados nos estudos
+primários, contados por número de estudos distintos em que aparecem.
+
+\begin{table}[htb]
+\centering
+\caption{Sistemas de armazenamento de objetos avaliados nos estudos primários.}
+\label{tab:sistemas}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Sistema} & \textbf{Estudos} \\
+\midrule
+MinIO            & 17 \\
+Ceph             & 11 \\
+OpenStack Swift  & 5 \\
+Lustre           & 2 \\
+Garage           & 1 \\
+RustFS           & 0 \\
+SeaweedFS        & 0 \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+O MinIO é o sistema mais estudado, aparecendo em 17 dos 38 trabalhos. Esse dado
+acrescenta uma segunda justificativa à sua adoção como \textit{baseline}: além
+de ser a solução cuja descontinuidade originou o problema, é a que dispõe de
+maior base de comparação na literatura.
+
+Na outra ponta, o RustFS e o SeaweedFS não aparecem em nenhum estudo revisado
+por pares, e o Garage em apenas um. A lacuna prevista na análise do problema
+(Seção~\ref{sec:analise-problema}) confirma-se de forma quantitativa: as
+alternativas emergentes ao MinIO ainda não foram objeto de avaliação acadêmica.
+
+\subsection{QP2 --- Dimensões e métricas}
+
+As métricas recorrentes nos estudos primários são \textit{throughput} (16
+estudos), latência (14), escalabilidade (11) e custo (10). Consumo de CPU e
+memória aparece em 5 estudos e disponibilidade em 4. Métricas como durabilidade
+e eficiência de \textit{erasure coding} aparecem isoladamente.
+
+Essas quatro primeiras métricas formam o conjunto de base para o laboratório.
+Elas não foram escolhidas por conveniência: são as que a literatura do domínio
+efetivamente emprega.
+
+\subsection{QP3 --- Procedimentos experimentais}
+
+Este foi o achado mais relevante para o desenho do laboratório, e também o mais
+inesperado.
+
+Quanto à instrumentação, 15 dos 38 estudos construíram a própria ferramenta de
+medição, na forma de \textit{scripts} em Python, \textit{harnesses} customizados
+ou rotinas específicas. A ferramenta estabelecida mais utilizada é o Warp,
+presente em apenas 3 estudos, seguida do MLPerf Storage e do IOR, com 2 cada.
+Ferramentas como COSBench, IO500, MDTest, S3bench e FIO aparecem uma vez cada.
+
+Em outras palavras, não existe instrumentação padronizada para avaliação de
+sistemas de armazenamento de objetos. Cada grupo mede à sua maneira, o que
+compromete a comparabilidade entre resultados publicados. Esse achado tem duas
+consequências para este trabalho: justifica declarar a instrumentação de forma
+explícita e detalhada, e recomenda o uso do Warp, que é a ferramenta com maior
+respaldo para carga compatível com S3.
+
+Quanto às cargas de trabalho, 30 dos 38 estudos declaram tamanhos de objeto.
+Três regimes se repetem:
+
+\begin{description}
+    \item[Metadados.] Objetos pequenos, de 1 KB a 64 KB, com listagem de
+          conjuntos que vão de um a cem milhões de objetos. Avalia a capacidade
+          do sistema de gerenciar grande quantidade de referências.
+    \item[Analítico.] Blocos de 16 MB a 128 MB, típicos de leitura de arquivos
+          \textit{Parquet} em \textit{Data Lake}, sobre conjuntos de dados de
+          dezenas a centenas de gigabytes.
+    \item[Arquivos grandes.] Objetos de 100 MB a 10 GB transferidos em
+          \textit{multipart}, com paralelismo que varia de 1 a 128 conexões
+          simultâneas.
+\end{description}
+
+Quanto à confiabilidade das medidas, apenas 10 dos 38 estudos informam o número
+de repetições executadas. Entre os que informam, os valores vão de 3 a 50, com
+mediana de 5. A omissão desse dado em 28 estudos é, por si só, uma limitação
+recorrente na literatura do domínio.
+
+\subsection{QP4 --- Fatores não funcionais}
+
+Vinte dos 38 estudos consideram ao menos um fator não funcional. Custo é o mais
+frequente, seguido de consumo energético, que aparece em trabalhos recentes
+associados à discussão de sustentabilidade ambiental. Licenciamento e governança
+do projeto aparecem com menos frequência e, em geral, de forma incidental: são
+mencionados como contexto da escolha de uma ferramenta, não como objeto de
+avaliação.
+
+Nenhum dos estudos recuperados trata do risco de descontinuidade de uma solução
+de código aberto como critério de seleção, que é precisamente o fator que
+originou esta pesquisa.
+
+\subsection{QP5 --- Lacunas apontadas}
+
+Três lacunas emergem do conjunto analisado. A primeira é a ausência de avaliação
+das alternativas emergentes: RustFS, SeaweedFS e Garage praticamente não
+aparecem, embora sejam apontadas na prática como substitutas do MinIO. A segunda
+é a ausência de instrumentação comum, que impede comparar resultados entre
+estudos. A terceira é o tratamento superficial dos fatores de licenciamento e
+sustentabilidade, que são mencionados mas não medidos.
+
+Cabe destacar um achado específico. O trabalho de
+\citep{tast2026comparative}, que é o antecedente mais próximo desta
+pesquisa por comparar Ceph, MinIO e OpenStack Swift, não realiza medição
+experimental: trata-se de análise comparativa de arquitetura e características.
+Não declara ferramenta de \textit{benchmark} nem carga de trabalho. A
+comparação empírica entre alternativas de código aberto ao MinIO, no contexto de
+\textit{Data Lake} híbrido, permanece portanto em aberto.
+
+\section{Derivação dos critérios do laboratório}
+\label{sec:derivacao}
+
+Esta seção cumpre o compromisso assumido na Seção~\ref{sec:escopo}: nenhum
+elemento do laboratório é introduzido sem referência ao achado que o fundamenta.
+A Tabela~\ref{tab:derivacao} associa cada decisão do desenho experimental à
+questão de pesquisa e ao resultado correspondente.
+
+\begin{table}[htb]
+\centering
+\footnotesize
+\caption{Derivação dos elementos do laboratório a partir dos achados do mapeamento.}
+\label{tab:derivacao}
+\begin{tabular}{@{}llp{6.2cm}@{}}
+\toprule
+\textbf{Elemento do laboratório} & \textbf{Origem} & \textbf{Fundamentação} \\
+\midrule
+MinIO como \textit{baseline}
+  & QP1 & Sistema mais avaliado na literatura (17 de 38 estudos) e origem do
+          problema investigado \\[2pt]
+RustFS como alternativa
+  & --- & Definição prévia da pesquisa; nenhum estudo recuperado o avalia, o que
+          caracteriza contribuição original \\[2pt]
+Ceph como alternativa
+  & QP1 & Segundo sistema mais avaliado (11 de 38) e compatível com S3 via RGW \\[2pt]
+\textit{Throughput}
+  & QP2 & Métrica mais recorrente (16 de 38 estudos) \\[2pt]
+Latência
+  & QP2 & Segunda métrica mais recorrente (14 de 38) \\[2pt]
+Consumo de CPU e memória
+  & QP2 & Empregado em 5 estudos; necessário para avaliar custo operacional \\[2pt]
+Warp como instrumentação
+  & QP3 & Ferramenta estabelecida mais utilizada para carga S3 (3 estudos) \\[2pt]
+Carga de metadados (1--64 KB)
+  & QP3 & Regime recorrente nos estudos de objetos pequenos \\[2pt]
+Carga analítica (16--128 MB)
+  & QP3 & Regime típico de leitura de arquivos em \textit{Data Lake} \\[2pt]
+Carga de arquivos grandes
+  & QP3 & Regime de transferência \textit{multipart}, de 100 MB a 10 GB \\[2pt]
+Mínimo de 5 repetições
+  & QP3 & Mediana observada entre os estudos que declaram repetições \\[2pt]
+Declaração explícita do procedimento
+  & QP3 & 28 de 38 estudos omitem o número de repetições; 15 usam instrumentação
+          própria não documentada \\[2pt]
+Licenciamento e governança
+  & QP4 & Considerados em 20 estudos, porém sem medição sistemática \\[2pt]
+Risco de descontinuidade
+  & QP5 & Nenhum estudo recuperado o trata como critério; contribuição original \\
+\bottomrule
+\end{tabular}
+\caption*{\textbf{Fonte:} Elaborado pelo autor (2026).}
+\end{table}
+
+Dois elementos da tabela não têm precedente na literatura recuperada: a avaliação
+do RustFS e o tratamento do risco de descontinuidade como critério de seleção.
+Ambos são registrados como contribuição original deste trabalho, e não como
+derivação de achado anterior.
+
+\section{Limitações do mapeamento}
+\label{sec:limitacoes-mapeamento}
+
+As decisões a seguir delimitam o alcance dos resultados apresentados e decorrem
+de escolhas de reprodutibilidade, viabilidade e escopo.
+
+\begin{description}
+    \item[Uso exclusivo da base OpenAlex.] Optou-se por consultar apenas a
+          \textit{API} pública da OpenAlex, sem recorrer a bases comerciais como
+          ACM Digital Library, IEEE \textit{Xplore} e Scopus. A escolha garante
+          que a busca possa ser repetida por terceiros sem credencial
+          institucional, o que não ocorre com consultas feitas em interfaces web
+          proprietárias. A contrapartida é a possível ausência de trabalhos
+          indexados apenas nessas bases.
+
+    \item[Teto de cem resultados por consulta.] Sete das dez consultas atingiram
+          o teto, de modo que a coleta foi truncada por restrição de volume e não
+          por esgotamento. Um teto maior recuperaria mais registros, ao custo de
+          um volume e custo físico.
+
+    \item[Filtro automático de pertinência.] O descarte de 495 registros sem
+          leitura individual pode ter removido trabalhos pertinentes que não
+          empregassem a terminologia prevista. A amostragem manual de controle
+          reduz, mas não elimina, esse risco.
+
+    \item[Triagem por um único pesquisador.] A seleção foi conduzida pelo autor,
+          o que introduz risco de viés. O registro do critério aplicado em cada
+          exclusão torna as decisões auditáveis, mas não substitui a revisão
+          independente por um segundo pesquisador.
+
+    \item[Ausência de terceiro corte.] O funil encerrou-se com os 38 estudos
+          aprovados no segundo estágio. O terceiro estágio consistiu em leitura
+          dirigida para extração de dados, sem nova exclusão.
+
+    \item[Literatura técnica fora do corpus.] Material técnico não revisado por
+          pares sobre o RustFS e sobre a descontinuação do MinIO é utilizado na
+          contextualização e na fundamentação teórica, mas não integra o conjunto
+          de estudos primários do mapeamento.
+\end{description}

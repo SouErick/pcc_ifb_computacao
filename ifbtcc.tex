@@ -63,12 +63,14 @@
 %%          \citep (from natbib) -- To cite a reference between parenthesis
 %%          citationblock environment -- To produce direct citation blocks according to the ABNT
 
+\PassOptionsToPackage{hyphens}{url}
 \documentclass[pt,oneside,openany,onehalfspacing,bsc]{ifbclass/ifbclass}
 
   \usepackage{colortbl}
   \usepackage{color}
   \usepackage[table]{xcolor}
-  \usepackage{microtype}
+  \usepackage{amsmath}
+  \usepackage[nopatch=eqnum]{microtype}
   \usepackage{bibentry}
   \usepackage{subfigure}
   \usepackage{multirow}
@@ -79,7 +81,8 @@
   \usepackage{lipsum}
   \usepackage{sectsty}
   \usepackage{tikz}
-  \usepackage{amsmath}
+  \usetikzlibrary{arrows.meta,positioning}
+  \usepackage{longtable}
   
   %% Set the language used in your code in the block above
   
@@ -97,6 +100,7 @@
               citecolor=black,
               urlcolor=black,
               colorlinks,
+              bookmarks=false,
               pdfpagelabels,
               pdftitle={Avaliação comparativa de alternativas ao MinIO},
               pdfauthor={Erick Sousa Saraiva},
@@ -176,9 +180,13 @@
   \mainmatter
   
   \include{text/introduction}
+  \include{text/fundamentacao}
   \include{text/background}
-  \include{text/desenv}
+  \include{text/metodologia}
   \include{text/conclusion}
+
+  \appendix
+  \include{appendix/mapping-study}
   
   % References
   
@@ -187,4 +195,5 @@
   \end{references}
   
   \end{document}
+
   
